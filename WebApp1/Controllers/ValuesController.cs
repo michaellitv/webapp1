@@ -17,7 +17,9 @@ namespace WebApp1.Controllers
 
 		public ValuesController()
 		{
-			log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+			log = new LoggerConfiguration().WriteTo.Console()
+				.WriteTo.File("logogo.txt")
+				.CreateLogger();
 			Log.Logger = new LoggerConfiguration().CreateLogger();
 		}
 
