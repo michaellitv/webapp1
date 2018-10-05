@@ -32,7 +32,7 @@ namespace WebApp1.Controllers
                 })
                 .CreateLogger();*/
 
-			Log.Information("No one listens to me!");
+			Log.Error("No one listens to me!");
 
 
 			return new string[] { "value1", "value2" };
