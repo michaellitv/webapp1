@@ -13,8 +13,11 @@ namespace WebApp1.Controllers
 {
 	public class ValuesController : ApiController
 	{
+		private Logger log;
+
 		public ValuesController()
 		{
+			log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 			Log.Logger = new LoggerConfiguration().CreateLogger();
 		}
 
@@ -33,8 +36,8 @@ namespace WebApp1.Controllers
                 })
                 .CreateLogger();*/
 
-			var log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
-			log.Error( @"Manual - error report" );
+
+			log.Error( "Manual - error report" );
 
 			Log.Error("No one listens to me!");
 
