@@ -17,7 +17,9 @@ namespace WebApp1.Controllers
 
 		public ValuesController()
 		{
+			// this LoggerSinkConfiguration loggerSinkConfiguration, string host, int port, LogEventLevel restrictedToMinimumLevel = LogEventLevel.Debug
 			log = new LoggerConfiguration().WriteTo.Console()
+				.WriteTo.Fluentd("10.101.0.4", 24224 )
 				.WriteTo.File("logogo.txt")
 				.CreateLogger();
 			Log.Logger = new LoggerConfiguration().CreateLogger();
