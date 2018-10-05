@@ -7,6 +7,7 @@ using System.Web.Http;
 using Serilog;
 using Serilog.Core;
 using Serilog.Sinks.Fluentd;
+using Serilog.Sinks.SystemConsole;
 
 namespace WebApp1.Controllers
 {
@@ -31,6 +32,9 @@ namespace WebApp1.Controllers
                     Tag = "My.SampleApp"
                 })
                 .CreateLogger();*/
+
+			var log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+			log.Error( @"Manual - error report" );
 
 			Log.Error("No one listens to me!");
 
