@@ -71,7 +71,7 @@ namespace WebApp1.Controllers
 			var count = 456;
 			log.Information("Retrieved {Count} records", count);
 
-			log.Warning("\"Request\":\"{reqid}\", \"cnt\":{cnt}", info.RequestId, count );
+			log.Warning("{@info.RequestId}", info.RequestId, count );
 
 
 			log.Error( "Manual - error report" );
