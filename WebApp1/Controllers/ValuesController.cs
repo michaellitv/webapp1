@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
+﻿using System.Collections.Generic;
 using System.Web.Http;
 using Serilog;
 using Serilog.Core;
-using Serilog.Sinks.Fluentd;
-using Serilog.Sinks.SystemConsole;
 
 namespace WebApp1.Controllers
 {
@@ -45,7 +39,13 @@ namespace WebApp1.Controllers
 		{
 			// this LoggerSinkConfiguration loggerSinkConfiguration, string host, int port, LogEventLevel restrictedToMinimumLevel = LogEventLevel.Debug
 			log = new LoggerConfiguration()//.WriteTo.Console()
-				.WriteTo.Fluentd("10.101.0.4", 24224 )
+				//.WriteTo.Fluentd("10.101.0.4", 24224 )
+				.WriteTo.Fluentd(new FluentdHandlerSettings
+				{
+					Tag = "My.App",
+					Host = "10.101.0.4",
+					Port = 24224
+				})
 				//.WriteTo.File("logogo.txt")
 				.CreateLogger();
 			Log.Logger = new LoggerConfiguration().CreateLogger();
