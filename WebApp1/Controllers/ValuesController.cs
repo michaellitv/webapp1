@@ -72,7 +72,7 @@ namespace WebApp1.Controllers
 				Age = 50,
 				tp = 1
 			};
-			log.Warning("{@info1}");
+			log.Warning("{@info1}", info1);
 
 			log.Information("{@info}", info);
 
