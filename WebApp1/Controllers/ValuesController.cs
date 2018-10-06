@@ -2,6 +2,7 @@
 using System.Web.Http;
 using Serilog;
 using Serilog.Core;
+using Serilog.Events;
 
 namespace WebApp1.Controllers
 {
@@ -38,7 +39,7 @@ namespace WebApp1.Controllers
 		public ValuesController()
 		{
 			// this LoggerSinkConfiguration loggerSinkConfiguration, string host, int port, LogEventLevel restrictedToMinimumLevel = LogEventLevel.Debug
-			log = new LoggerConfiguration()//.WriteTo.Console()
+			log = new LoggerConfiguration()
 				//.WriteTo.Fluentd("10.101.0.4", 24224 )
 				.WriteTo.Fluentd(new FluentdHandlerSettings
 				{
@@ -46,7 +47,6 @@ namespace WebApp1.Controllers
 					Host = "10.101.0.4",
 					Port = 24224
 				})
-				//.WriteTo.File("logogo.txt")
 				.CreateLogger();
 			Log.Logger = new LoggerConfiguration().CreateLogger();
 		}
@@ -54,22 +54,9 @@ namespace WebApp1.Controllers
 		// GET api/values
 		public IEnumerable<string> Get()
 		{
-			//var log = new LoggerConfiguration()
-			//    .WriteTo.Fluentd()
-			//    .CreateLogger();
-
-
-			//new Serilog.Sinks.Fluentd..FluentdHandlerSettings { };
-			/*var log = new LoggerConfiguration()
-                .WriteTo.Fluentd(new FluentdHandlerSettings
-                {
-                    Tag = "My.SampleApp"
-                })
-                .CreateLogger();*/
 
 			var info = new LogMessage
 			{
-				Tag = "My.App",
 				RequestId = "239423049FL",
 				Component = "Startup",
 				Method = "Configure",
@@ -80,6 +67,12 @@ namespace WebApp1.Controllers
 			};
 
 			log.Information("{@info}", info);
+
+			var count = 456;
+			log.Information("Retrieved {Count} records", count);
+
+			log.Warning("\"Request\":\"{reqid}\", \"cnt\":{cnt}", info.RequestId, count );
+
 
 			log.Error( "Manual - error report" );
 
