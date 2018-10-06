@@ -73,6 +73,7 @@ namespace WebApp1.Controllers
 				tp = 1
 			};
 			log.Warning("{@info1}", info1);
+			log.Error("{@info}", new { Name = "myname", Surname = "mysurname" } );
 
 			log.Information("{@info}", info);
 
