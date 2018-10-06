@@ -66,6 +66,14 @@ namespace WebApp1.Controllers
 				ComplexDictionary = new Dictionary<string, object> { { "Id", 1 }, { "Name", "Fred" }, { "Sub", new SubSub { Id = 6, Name = "Joe" } } }
 			};
 
+			var info1 = new {
+				First = "Mister",
+				Second = "Twister",
+				Age = 50,
+				tp = 1
+			};
+			log.Warning("{@info1}");
+
 			log.Information("{@info}", info);
 
 			var count = 456;
