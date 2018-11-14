@@ -1,8 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Web.Http;
+using System.Web.Mvc;
+using Newtonsoft.Json;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Microsoft.Azure.ServiceBus;
+
+
+using System;
+using System.Text;
+//using System.Web.Script.Serialization;
 
 namespace WebApp1.Controllers
 {
@@ -32,12 +40,20 @@ namespace WebApp1.Controllers
 		public string Name { get; set; }
 	}
 
+	//[Produces("application/json")]
+	//[Route("api/[controller]")]
+	[System.Web.Http.RoutePrefix("api/values")]
 	public class ValuesController : ApiController
 	{
 		private Logger log;
+		private IWork work;
 
 		public ValuesController()
 		{
+			//this.work = work;
+
+			//this.work.doWork();
+			//System.Web.Http.
 			// this LoggerSinkConfiguration loggerSinkConfiguration, string host, int port, LogEventLevel restrictedToMinimumLevel = LogEventLevel.Debug
 			log = new LoggerConfiguration()
 				//.WriteTo.Fluentd("10.101.0.4", 24224 )
@@ -49,6 +65,41 @@ namespace WebApp1.Controllers
 				})
 				.CreateLogger();
 			Log.Logger = new LoggerConfiguration().CreateLogger();
+		}
+
+		[System.Web.Http.Route("~/my/json")]
+		public System.Web.Http.Results.JsonResult<string> GetJn()
+		{
+			string busConn = "";
+			string queueName = "qname";
+			try
+			{
+				IQueueClient queueClient = new QueueClient(busConn, queueName);
+				queueClient.SendAsync(new Message(Encoding.ASCII.GetBytes("some text")));
+				// to be pulled like string str = Encoding.ASCII.GetString(bytes);
+			}
+			catch (Exception ex)
+			{
+				return Json("Failed with exception");
+			}
+
+			return Json("OK");
+		}
+
+		[System.Web.Http.Route("~/customers/{id}/orders")]
+		//[System.Web.Http.Route("customers/{customerId}/orders")]
+		//[System.Web.Http.HttpGet]
+		public string GetAny(int id)
+		{
+			return "ok" + id;
+		}
+
+		[System.Web.Http.Route("the/sub")]
+		//[System.Web.Http.Route("customers/{customerId}/orders")]
+		//[System.Web.Http.HttpGet]
+		public string GetSub()
+		{
+			return "ok-sub";
 		}
 
 		// GET api/values
