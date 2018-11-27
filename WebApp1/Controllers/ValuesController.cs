@@ -70,12 +70,20 @@ namespace WebApp1.Controllers
 		[System.Web.Http.Route("~/my/json")]
 		public System.Web.Http.Results.JsonResult<string> GetJn()
 		{
-			string busConn = "";
+			string busConn = "Endpoint=sb://shieldox-servicebus-dev.servicebus.windows.net/;SharedAccessKeyName=app.control.topic.access.policy;SharedAccessKey=qU6zO7htfvVoc0Jd6vofesnJkV+kP/NBQz2gnI5teM0=";
 			string queueName = "qname";
 			try
 			{
-				IQueueClient queueClient = new QueueClient(busConn, queueName);
-				queueClient.SendAsync(new Message(Encoding.ASCII.GetBytes("some text")));
+				TopicClient tc = new TopicClient( busConn, "app.control.topic" );
+				//Message message, DateTimeOffset scheduleEnqueueTimeUtc
+				Message msg = new Message(Encoding.UTF8.GetBytes("some string is here"));
+				DateTimeOffset scheduleEnqueueTimeUtc = DateTimeOffset.Now;
+				tc.ScheduleMessageAsync(msg, DateTimeOffset.Now);
+
+				//string strBody = Encoding.UTF8.GetString(message.Body);
+
+				//IQueueClient queueClient = new QueueClient(busConn, queueName);
+				//queueClient.SendAsync(new Message(Encoding.ASCII.GetBytes("some text")));
 				// to be pulled like string str = Encoding.ASCII.GetString(bytes);
 			}
 			catch (Exception ex)

@@ -1,7 +1,12 @@
 ﻿using Autofac;
+using Microsoft.Azure.ServiceBus;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Mvc;
 
@@ -53,8 +58,57 @@ namespace WebApp1
 		}
 	}
 
+
+	/// <summary>
+	/// Structure for Application Control message sent via SB Topic
+	/// </summary>
+	[JsonObject(MemberSerialization.OptIn)]
+	public class AppControlMessage
+	{
+		[JsonProperty(PropertyName = "app")]
+		public string AppName { get; set; }
+
+		[JsonProperty(PropertyName = "loglevel")]
+		public string LogLevel { get; set; }
+
+		public override string ToString()
+		{
+			return JsonConvert.SerializeObject(this);
+		}
+	}
+
 	public static class WebApiConfig
 	{
+		static ISubscriptionClient subscriptionClient;
+
+		static async Task ProcessAppControlMessagesAsync(Message message, CancellationToken token)
+		{
+			string strBody = Encoding.UTF8.GetString(message.Body);
+
+			try
+			{
+				AppControlMessage controlObject = JsonConvert.DeserializeObject<AppControlMessage>(strBody);
+				if (0 == controlObject.AppName.CompareTo("hoho"))
+				{
+				}
+			}
+			catch (Exception ex)
+			{
+				string se = ex.Message;
+			}
+
+			// Complete the message so that it is not received again.
+			// This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
+			if (!token.IsCancellationRequested)
+			{
+				await subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
+			}
+
+			// Note: Use the cancellationToken passed as necessary to determine if the subscriptionClient has already been closed.
+			// If subscriptionClient has already been closed, you can choose to not call CompleteAsync() or AbandonAsync() etc.
+			// to avoid unnecessary exceptions.
+		}
+
 		public static void Register(HttpConfiguration config)
 		{
 			// Web API configuration and services
@@ -70,6 +124,61 @@ namespace WebApp1
 
 			//DependencyResolver
 			DependencyResolver.SetResolver(new SampleDependencyResolver(DependencyResolver.Current));
+
+			AppControlMessage appMsg = new AppControlMessage()
+			{
+				AppName = "webapi",
+				LogLevel = "Fatal"
+			};
+			string sObj = JsonConvert.SerializeObject(appMsg);
+
+			//tc.ScheduleMessageAsync(new Message(Encoding.UTF8.GetBytes(sObj)), DateTimeOffset.Now);
+
+			// EntityPath=testqueue;
+			string testQueuePath = "Endpoint=sb://shieldox-servicebus-dev.servicebus.windows.net/;SharedAccessKeyName=testpolicy;SharedAccessKey=jNrqpkk5kqMNsKtzZIfIr+dZ7uq2gvV1I8j9aswXMUs=;";
+			string testEntityPath = "testqueue";
+			QueueClient queueClient = new QueueClient(testQueuePath, testEntityPath/*, ReceiveMode receiveMode = ReceiveMode.PeekLock*/);
+			queueClient.SendAsync(new Message(Encoding.UTF8.GetBytes(sObj))).Wait();
+
+
+			string sbConnectionString = "Endpoint=sb://shieldox-servicebus-dev.servicebus.windows.net/;SharedAccessKeyName=app.control.topic.access.policy;SharedAccessKey=qU6zO7htfvVoc0Jd6vofesnJkV+kP/NBQz2gnI5teM0=";
+			string sbTopic = "app.control.topic";
+			string sbSubscription = "subscrtest";
+
+			subscriptionClient = new SubscriptionClient(sbConnectionString, sbTopic, sbSubscription);
+
+			subscriptionClient.RegisterMessageHandler(
+				ProcessAppControlMessagesAsync,
+				new MessageHandlerOptions(args => {
+						//var context = args.ExceptionReceivedContext;
+						// context.Endpoint, context.EntityPath, context.Action
+						return Task.CompletedTask;
+				}
+				)
+				{
+					MaxConcurrentCalls = 1,
+					AutoComplete = false
+				}
+				);
+
+
+			try
+			{
+				TopicClient tc = new TopicClient(sbConnectionString, sbTopic);
+				//Message message, DateTimeOffset scheduleEnqueueTimeUtc
+
+				//tc.ScheduleMessageAsync(new Message(Encoding.UTF8.GetBytes(sObj)), DateTimeOffset.Now);
+
+				//string strBody = Encoding.UTF8.GetString(message.Body);
+
+				//IQueueClient queueClient = new QueueClient(busConn, queueName);
+				//queueClient.SendAsync(new Message(Encoding.ASCII.GetBytes("some text")));
+				// to be pulled like string str = Encoding.ASCII.GetString(bytes);
+			}
+			catch (Exception ex)
+			{
+				string str = ex.Message;
+			}
 
 			// Web API routes
 			config.MapHttpAttributeRoutes();
